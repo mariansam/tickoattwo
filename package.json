@@ -3,9 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build:1-next": "next build",
-    "build:2-ws": "tsc --project tsconfig.server.json",
-    "build": "run-s build:*",
+    "build:next": "next build",
+    "build": "run-s build:next",
     "dev:ws": "NODE_ENV=development tsx src/server/wss.ts",
     "dev:next": "next dev",
     "dev": "run-p dev:*",
