@@ -11,15 +11,49 @@ import superjson from "superjson";
 
 import { type AppRouter } from "~/server/api/root";
 
-const getBaseUrl = () => {
+import { wsLink, createWSClient } from '@trpc/client/links/wsLink';
+import { NextPageContext } from "next";
+
+const getBaseHttpUrl = () => {
     if (typeof window !== "undefined") return ""; // browser should use relative url
     if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
     return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
 };
 
+const getBaseWebsocketUrl = () => {
+    // if (typeof window !== "undefined") return ""; // browser should use relative url
+    // if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
+    // return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
+    return "ws://localhost:3001";
+};
+
+const getEndingLink = (ctx: NextPageContext | undefined) => {
+    if (typeof window === 'undefined') {
+        return httpBatchLink({
+            url: `${getBaseHttpUrl()}/api/trpc`,
+            headers() {
+                if (ctx?.req) {
+                    // on ssr, forward client's headers to the server
+                    return {
+                        ...ctx.req.headers,
+                        'x-ssr': '1',
+                    };
+                }
+                return {};
+            },
+        });
+    }
+    const client = createWSClient({
+        url: getBaseWebsocketUrl(),
+    });
+    return wsLink<AppRouter>({
+        client,
+    });
+};
+
 /** A set of type-safe react-query hooks for your tRPC API. */
 export const api = createTRPCNext<AppRouter>({
-    config() {
+    config({ ctx }) {
         return {
             /**
              * Transformer used for data de-serialization from the server.
@@ -39,9 +73,10 @@ export const api = createTRPCNext<AppRouter>({
                         process.env.NODE_ENV === "development" ||
                         (opts.direction === "down" && opts.result instanceof Error),
                 }),
-                httpBatchLink({
-                    url: `${getBaseUrl()}/api/trpc`,
-                }),
+                getEndingLink(ctx),
+                // httpBatchLink({
+                //     url: `${getBaseUrl()}/api/trpc`,
+                // }),
             ],
         };
     },

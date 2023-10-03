@@ -20,6 +20,11 @@ import { type Session } from "next-auth";
 import { getServerAuthSession } from "~/server/auth";
 import { prisma } from "~/server/db";
 
+import { NodeHTTPCreateContextFnOptions } from "@trpc/server/dist/adapters/node-http";
+import { IncomingMessage } from "http";
+import ws from "ws";
+import { getSession } from "next-auth/react";
+
 type CreateContextOptions = {
     session: Session | null;
 };
@@ -47,11 +52,14 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
  *
  * @see https://trpc.io/docs/context
  */
-export const createTRPCContext = async (opts: CreateNextContextOptions) => {
+export const createTRPCContext = async (opts: CreateNextContextOptions | NodeHTTPCreateContextFnOptions<IncomingMessage, ws>) => {
     const { req, res } = opts;
 
+    // const reqCookies = { ...req, cookies: {} };
+
     // Get the session from the server using the getServerSession wrapper function
-    const session = await getServerAuthSession({ req, res });
+    // const session = await getServerAuthSession({ req, res });
+    const session = await getSession({ req });
 
     return createInnerTRPCContext({
         session,
@@ -118,3 +126,6 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
  * @see https://trpc.io/docs/procedures
  */
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+
+
+export const tRPCProcudure = t.procedure;

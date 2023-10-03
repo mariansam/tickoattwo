@@ -6,12 +6,40 @@ generator client {
 }
 
 datasource db {
-    provider = "sqlite"
+    // provider = "sqlite"
+    provider = "postgresql"
+
     // NOTE: When using postgresql, mysql or sqlserver, uncomment the @db.Text annotations in model Account below
     // Further reading:
     // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
     // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
     url      = env("DATABASE_URL")
+}
+
+enum GridFieldState {
+    empty
+    player1in
+    player2in
+    both
+}
+
+enum GameState {
+    inviting
+    player1plays
+    player2plays
+    ended
+}
+
+model GameSession {
+    id          String      @id @default(cuid())
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
+    slug        String      @unique
+    player1     String?
+    player2     String?
+    visible     Boolean
+    state       GameState   @default(inviting)
+    grid        GridFieldState[]    @default([empty, empty, empty, empty, empty, empty, empty, empty, empty])
 }
 
 model Example {
