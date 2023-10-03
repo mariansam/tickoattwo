@@ -13,6 +13,7 @@ import { type AppRouter } from "~/server/api/root";
 
 import { wsLink, createWSClient } from '@trpc/client/links/wsLink';
 import { NextPageContext } from "next";
+import { env } from "~/env.mjs";
 
 const getBaseHttpUrl = () => {
     if (typeof window !== "undefined") return ""; // browser should use relative url
@@ -24,7 +25,7 @@ const getBaseWebsocketUrl = () => {
     // if (typeof window !== "undefined") return ""; // browser should use relative url
     // if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
     // return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
-    return "ws://localhost:3001";
+    return env.NEXT_PUBLIC_WS_ENDPOINT;
 };
 
 const getEndingLink = (ctx: NextPageContext | undefined) => {
