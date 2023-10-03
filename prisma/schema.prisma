@@ -27,7 +27,8 @@ enum GameState {
     inviting
     player1plays
     player2plays
-    ended
+    player1won
+    player2won
 }
 
 model GameSession {
@@ -39,6 +40,7 @@ model GameSession {
     player2     String?
     visible     Boolean
     state       GameState   @default(inviting)
+    lastPos     Int         @default(-1)
     grid        GridFieldState[]    @default([empty, empty, empty, empty, empty, empty, empty, empty, empty])
 }
 

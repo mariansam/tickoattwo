@@ -3,13 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "next build",
+    "build:1-next": "next build",
+    "build:2-ws": "tsc --project tsconfig.server.json",
+    "build": "run-s build:*",
     "dev:ws": "NODE_ENV=development tsx src/server/wss.ts",
     "dev:next": "next dev",
     "dev": "run-p dev:*",
     "postinstall": "prisma generate",
     "lint": "next lint",
-    "start": "next start"
+    "start:next": "next start",
+    "start:ws": "NODE_ENV=production tsx src/server/wss.ts",
+    "start": "run-p start:*"
   },
   "dependencies": {
     "@next-auth/prisma-adapter": "^1.0.5",

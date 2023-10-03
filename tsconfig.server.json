@@ -7,13 +7,17 @@
         "lib": ["ES2019", "DOM"],
         "isolatedModules": false,
         "noEmit": false,
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "baseUrl": ".",
+        "paths": {
+            "~/*": ["./src/*"]
+        }
     },
     "include": [
         "next-env.d.ts",
         "next-auth.d.ts",
-        "**/*.ts",
-        "**/*.tsx",
-        "**/*.js"
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "src/**/*.js"
     ]
 }

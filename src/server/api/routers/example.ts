@@ -30,6 +30,7 @@ export type PingMessage = MessageType<'Ping'>;
 export type GameUpdatedMessage = MessageType<'GameUpdated'> & {
     grid: GridFieldState[],
     state: GameState,
+    lastPos: number,
 };
 
 export type GameMessage = PlayerConnectedMessage | PingMessage | GameUpdatedMessage;
@@ -42,14 +43,17 @@ const ee = new EventEmitter();
 
 const sendEvent = (data: GameMessage) => ee.emit('add', data);
 
-const getGame = async (slug: string) => await prisma.gameSession.findFirst({
+export const getGame = async (slug: string) => await prisma.gameSession.findFirst({
     where: {
         slug,
     },
 });
 
-const isValidMove = (grid: GridFieldState[], buttonIndex: number, player: 'player1' | 'player2') => {
+/** @param lastPos use -1 for initial move */
+const isValidMove = (grid: GridFieldState[], buttonIndex: number, player: 'player1' | 'player2', lastPos: number) => {
     if (buttonIndex < 0 || buttonIndex > 8)
+        return false;
+    if (buttonIndex === lastPos)
         return false;
     const currentValue = grid[buttonIndex];
     if (currentValue === `${player}in` || currentValue === 'both')
@@ -64,6 +68,37 @@ const updateGrid = (grid: GridFieldState[], buttonIndex: number, player: 'player
     const newGrid = [...grid];
     newGrid[buttonIndex] = newValue;
     return newGrid;
+};
+
+/** call after updateGrid */
+const isGameWon = (grid: GridFieldState[]) => {
+    const allBoth = (a: number, b: number, c: number) =>
+        grid[a] === 'both' && grid[b] === 'both' && grid[c] === 'both';
+
+    // rows
+    if (allBoth(0, 1, 2))
+        return true;
+    if (allBoth(3, 4, 5))
+        return true;
+    if (allBoth(6, 7, 8))
+        return true;
+
+    // columns
+    if (allBoth(0, 3, 6))
+        return true;
+    if (allBoth(1, 4, 7))
+        return true;
+    if (allBoth(2, 5, 8))
+        return true;
+
+    // diagonals
+    if (allBoth(0, 2, 4))
+        return true;
+    if (allBoth(2, 4, 6))
+        return true;
+
+    // :(
+    return false;
 };
 
 
@@ -97,15 +132,22 @@ export const exampleRouter = createTRPCRouter({
             if (playerId !== game.player1 && playerId !== game.player2)
                 return;
             const player = playerId === game.player1 ? 'player1' : 'player2';
-            const isValid = isValidMove(game.grid, buttonIndex, player);
+            if (game.state !== `${player}plays`)
+                return;
+            const oppositePlayer = playerId === game.player1 ? 'player2' : 'player1';
+            const isValid = isValidMove(game.grid, buttonIndex, player, game.lastPos);
             if (!isValid)
                 return;
             const newGrid = updateGrid(game.grid, buttonIndex, player);
+            const hasWon = isGameWon(newGrid);
+            const newState: GameState = hasWon ? `${player}won` : `${oppositePlayer}plays`;
+            console.log({hasWon, newState})
             sendEvent({
                 type: 'GameUpdated',
                 slug: game.slug,
                 grid: newGrid,
-                state: game.state,
+                state: newState,
+                lastPos: buttonIndex,
             });
             await prisma.gameSession.update({
                 where: {
@@ -113,6 +155,8 @@ export const exampleRouter = createTRPCRouter({
                 },
                 data: {
                     grid: newGrid,
+                    state: newState,
+                    lastPos: buttonIndex,
                 },
             });
         }),
@@ -208,10 +252,18 @@ export const exampleRouter = createTRPCRouter({
                     },
                     data: {
                         player2: newPlayerId,
+                        state: 'player1plays',
                     },
                 });
 
-                sendEvent({ type: 'PlayerConnected', slug, newPlayerId });
+                // sendEvent({ type: 'PlayerConnected', slug, newPlayerId });
+                sendEvent({
+                    type: 'GameUpdated',
+                    slug: game.slug,
+                    grid: game.grid,
+                    state: 'player1plays',
+                    lastPos: -1,
+                });
 
                 return { role: 'player2' as const, playerId: newPlayerId };
             } else {

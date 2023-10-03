@@ -66,6 +66,7 @@ export const Game: React.FC<GameProps> = (props) => {
         <div>
             <p>Hraješ hru: {slug}</p>
             <p>Role: {role}</p>
+            <p>State: {gameData.data?.state}</p>
             <p>ID: {playerId}</p>
             <div>
                 <div className="grid gap-4 grid-cols-3 w-fit">
