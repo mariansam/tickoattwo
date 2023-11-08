@@ -1,9 +1,10 @@
+import React from 'react';
 import { GameState, GridFieldState } from '@prisma/client';
-import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { PlayerInfo } from '~/types';
 import { api } from '~/utils/api';
 import { useLocalStorage } from '~/utils/utils';
+import { GameBoard } from './game-board';
 
 type GameProps = PlayerInfo & {
     slug: string,
@@ -53,6 +54,7 @@ export const Game: React.FC<GameProps> = (props) => {
     });
 
     const makeMove = async (buttonIndex: number) => {
+        console.log({buttonIndex})
         if (!playerId)
             return;
         await makeMoveMutation.mutateAsync({
@@ -63,47 +65,16 @@ export const Game: React.FC<GameProps> = (props) => {
     };
 
     return (
-        <div>
+        <div className="flex flex-col items-center">
             <p>Hraješ hru: {slug}</p>
             <p>Role: {role}</p>
             <p>State: {gameData.data?.state}</p>
             <p>ID: {playerId}</p>
             <div>
-                <div className="grid gap-4 grid-cols-3 w-fit">
-                    {gameData.data?.grid.map((state, index) => (
-                        <GameButton
-                            key={index}
-                            buttonIndex={index}
-                            state={state}
-                            onClick={() => void makeMove(index)}
-                        />
-                    ))}
-                </div>
+                {gameData.data && (
+                    <GameBoard onButtonClick={(buttonIndex) => void makeMove(buttonIndex)} grid={gameData.data.grid} />
+                )}
             </div>
         </div>
     );
 };
-
-type GameButtonProps = {
-    buttonIndex: number,
-    state: GridFieldState,
-    onClick: () => void;
-};
-
-const GameButton: React.FC<GameButtonProps> = (props) => {
-    const {
-        buttonIndex,
-        state,
-        onClick,
-    } = props;
-
-    return (
-        <button
-            className="flex flex-col justify-center align-center w-20 h-20 text-xl bg-slate-300"
-            onClick={onClick}
-        >
-            <div>{buttonIndex}</div>
-            <div>{state}</div>
-        </button>
-    )
-}

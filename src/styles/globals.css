@@ -1,3 +1,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+    @apply bg-slate-100;
+    font-family: 'Comic Sans MS', sans-serif;
+}
+
+.svg-test {
+    background-color: pink;
+}
+
+.svg-test:hover {
+    background-color: red;
+    fill: red;
+}
