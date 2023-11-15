@@ -106,7 +106,7 @@ const GridFieldIndicator: React.FC<GridFieldIndicatorProps> = (props) => {
 
     const coords = CENTER_POINTS[index];
     const [x, y] = coords!;
-    const translate = `translate(${x}, ${y})`;
+    const translate = `translate(${x!}, ${y!})`;
 
     if (state === 'player1in') {
         return (
