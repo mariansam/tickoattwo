@@ -92,7 +92,7 @@ const isGameWon = (grid: GridFieldState[]) => {
         return true;
 
     // diagonals
-    if (allBoth(0, 2, 4))
+    if (allBoth(0, 4, 8))
         return true;
     if (allBoth(2, 4, 6))
         return true;
