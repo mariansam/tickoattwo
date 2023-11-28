@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { GameState, GridFieldState } from '@prisma/client';
-
+import { type GridFieldState } from '@prisma/client';
 
 const PATHS = [
     'M 180 10 L 10 10 L 10 190 L 30 165 L 70 140 L 125 127 L 136 85 L 155 43 Z',

@@ -6,12 +6,11 @@ import { createId as cuid } from '@paralleldrive/cuid2';
 import {
     createTRPCRouter,
     publicProcedure,
-    protectedProcedure,
     tRPCProcudure,
 } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
 import { makeId } from "~/utils/utils";
-import { GameState, type GridFieldState } from "@prisma/client";
+import { type GameState, type GridFieldState } from "@prisma/client";
 
 export type MessageType<T extends string> = {
     type: T;
@@ -102,7 +101,7 @@ const isGameWon = (grid: GridFieldState[]) => {
 
 export const exampleRouter = createTRPCRouter({
     createNewGame: publicProcedure
-        .mutation(async ({ ctx, input }) => {
+        .mutation(async ({ ctx }) => {
             console.log('creating new game');
 
             const slug = makeId(SLUG_LENGTH);
@@ -177,7 +176,7 @@ export const exampleRouter = createTRPCRouter({
         .input(z.object({
             slug: z.string(),
         }))
-        .subscription(({ ctx, input }) => {
+        .subscription(({ input }) => {
             return observable<GameMessage>((emit) => {
                 console.log('setting up the observable');
 
@@ -234,7 +233,6 @@ export const exampleRouter = createTRPCRouter({
                     },
                 });
 
-                // sendEvent({ type: 'PlayerConnected', slug, newPlayerId });
                 sendEvent({
                     type: 'GameUpdated',
                     slug: game.slug,

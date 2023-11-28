@@ -1,20 +1,11 @@
 import React from 'react';
-import { GameState, GridFieldState } from '@prisma/client';
-import { useEffect, useRef, useState } from 'react';
-import { PlayerInfo } from '~/types';
+import { type PlayerInfo } from '~/types';
 import { api } from '~/utils/api';
-import { useLocalStorage } from '~/utils/utils';
 import { GameBoard } from './game-board';
 import { useRouter } from 'next/router';
 
 type GameProps = PlayerInfo & {
     slug: string,
-};
-
-type LocalData = {
-    [key: string]: {
-        player1: string,
-    },
 };
 
 export const Game: React.FC<GameProps> = (props) => {
@@ -34,7 +25,6 @@ export const Game: React.FC<GameProps> = (props) => {
     const makeMoveMutation = api.example.makeMove.useMutation();
     const renewGameMutation = api.example.renewGame.useMutation();
 
-    const [subscribed, setSubscribed] = useState(false);
     api.example.newGameDataSubscription.useSubscription({
         slug,
     }, {
@@ -50,9 +40,6 @@ export const Game: React.FC<GameProps> = (props) => {
             } else if (message.type === 'RenewGame') {
                 void router.push(`${message.newSlug}`);
             }
-        },
-        onStarted: () => {
-            setSubscribed(true);
         },
     });
 
