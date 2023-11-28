@@ -30,6 +30,7 @@ const server = z.object({
 const client = z.object({
     // NEXT_PUBLIC_CLIENTVAR: z.string().min(1),
     NEXT_PUBLIC_WS_ENDPOINT: z.string(),
+    NEXT_PUBLIC_FRONTEND: z.string(),
 });
 
 /**
@@ -42,6 +43,7 @@ const processEnv = {
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_WS_ENDPOINT: process.env.NEXT_PUBLIC_WS_ENDPOINT,
+    NEXT_PUBLIC_FRONTEND: process.env.NEXT_PUBLIC_FRONTEND,
     // NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     // NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     // DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,

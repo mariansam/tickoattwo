@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { type GridFieldState } from '@prisma/client';
+import { GameState, type GridFieldState } from '@prisma/client';
+import { isMoveValid } from '~/utils/game';
 
 const PATHS = [
     'M 180 10 L 10 10 L 10 190 L 30 165 L 70 140 L 125 127 L 136 85 L 155 43 Z',
@@ -32,12 +33,18 @@ const CENTER_POINTS = [
 type GameBoardProps = {
     onButtonClick: (buttonIndex: number) => void,
     grid: GridFieldState[],
+    lastPos: number,
+    player: 'player1' | 'player2' | 'spectator',
+    state: GameState,
 };
 
 export const GameBoard: React.FC<GameBoardProps> = (props) => {
     const {
         onButtonClick,
         grid,
+        lastPos,
+        player,
+        state,
     } = props;
 
     const [hoveredButton, setHoveredButton] = useState<number>();
@@ -62,7 +69,13 @@ export const GameBoard: React.FC<GameBoardProps> = (props) => {
                 {PATHS.map((path, index) => (
                     <path
                         key={index}
-                        fill={hoveredButton === index ? 'yellow' : 'transparent'}
+                        fill={
+                            (player !== 'spectator'
+                                && state === `${player}plays`
+                                && hoveredButton === index
+                                && isMoveValid(grid, index, player, lastPos)
+                            ) ? 'yellow' : 'transparent'
+                        }
                         d={path}
                     />
                 ))}
