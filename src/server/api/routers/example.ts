@@ -21,19 +21,17 @@ export type MessageType<T extends string> = {
     receiver?: string | undefined;
 };
 
-export type PlayerConnectedMessage = MessageType<'PlayerConnected'> & {
-    newPlayerId: string,
-};
-
-export type PingMessage = MessageType<'Ping'>;
-
 export type GameUpdatedMessage = MessageType<'GameUpdated'> & {
     grid: GridFieldState[],
     state: GameState,
     lastPos: number,
 };
 
-export type GameMessage = PlayerConnectedMessage | PingMessage | GameUpdatedMessage;
+export type RenewGameMessage = MessageType<'RenewGame'> & {
+    newSlug: string,
+};
+
+export type GameMessage = RenewGameMessage | GameUpdatedMessage;
 
 const SLUG_LENGTH = 8;
 
@@ -180,7 +178,6 @@ export const exampleRouter = createTRPCRouter({
             slug: z.string(),
         }))
         .subscription(({ ctx, input }) => {
-            console.log('setting up a newThingSubscription maybe', input.slug);
             return observable<GameMessage>((emit) => {
                 console.log('setting up the observable');
 
@@ -188,10 +185,7 @@ export const exampleRouter = createTRPCRouter({
                     if (event.slug && event.slug !== input.slug)
                         return;
 
-                    // if (event.receiver && event.receiver !== input.)
-
-                    if (event.slug === input.slug)
-                        emit.next(event);
+                    emit.next(event);
                 }
 
                 ee.on('add', onNewEvent);
@@ -202,28 +196,12 @@ export const exampleRouter = createTRPCRouter({
             });
         }),
 
-    hello: publicProcedure
-        .input(z.object({ text: z.string() }))
-        .query(({ input }) => {
-            return {
-                greeting: `Hello ${input.text}`,
-            };
-        }),
-
-    getAll: publicProcedure.query(({ ctx }) => {
-        return ctx.prisma.example.findMany();
-    }),
-
-    getSecretMessage: protectedProcedure.query(() => {
-        return "you can now see this secret message!";
-    }),
-
     connectPlayer: publicProcedure
         .input(
             z.object({
                 slug: zodSlug(),
             }))
-        .mutation(async ({input: { slug }}) => {
+        .mutation(async ({ input: { slug } } ) => {
             console.log('connecting', slug);
 
             const game = await getGame(slug);
@@ -269,5 +247,27 @@ export const exampleRouter = createTRPCRouter({
             } else {
                 // visitor wants to connect
             }
+        }),
+
+    renewGame: publicProcedure
+        .input(
+            z.object({
+                slug: zodSlug(),
+            }))
+        .mutation(async ({ ctx, input: { slug } }) => {
+            const newSlug = makeId(SLUG_LENGTH);
+
+            await ctx.prisma.gameSession.create({
+                data: {
+                    slug: newSlug,
+                    visible: true,
+                },
+            });
+
+            sendEvent({
+                type: 'RenewGame',
+                slug,
+                newSlug,
+            });
         }),
 });

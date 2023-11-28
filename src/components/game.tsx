@@ -5,6 +5,7 @@ import { PlayerInfo } from '~/types';
 import { api } from '~/utils/api';
 import { useLocalStorage } from '~/utils/utils';
 import { GameBoard } from './game-board';
+import { useRouter } from 'next/router';
 
 type GameProps = PlayerInfo & {
     slug: string,
@@ -23,8 +24,7 @@ export const Game: React.FC<GameProps> = (props) => {
     } = props;
     const playerId = role !== 'spectator' ? props.playerId : undefined;
 
-    // const [gameState, setGameState] = useState<GameState>();
-    // const [gameGrid, setGameGrid] = useState<GridFieldState[]>();
+    const router = useRouter();
 
     const trpcContext = api.useContext();
     const gameData = api.example.getGameData.useQuery({
@@ -32,6 +32,7 @@ export const Game: React.FC<GameProps> = (props) => {
     });
 
     const makeMoveMutation = api.example.makeMove.useMutation();
+    const renewGameMutation = api.example.renewGame.useMutation();
 
     const [subscribed, setSubscribed] = useState(false);
     api.example.newGameDataSubscription.useSubscription({
@@ -46,6 +47,8 @@ export const Game: React.FC<GameProps> = (props) => {
                         state: message.state,
                     };
                 });
+            } else if (message.type === 'RenewGame') {
+                void router.push(`${message.newSlug}`);
             }
         },
         onStarted: () => {
@@ -64,6 +67,12 @@ export const Game: React.FC<GameProps> = (props) => {
         });
     };
 
+    const renewGame = async () => {
+        await renewGameMutation.mutateAsync({
+            slug,
+        });
+    };
+
     return (
         <div className="flex flex-col items-center">
             <p>Hraješ hru: {slug}</p>
@@ -75,6 +84,9 @@ export const Game: React.FC<GameProps> = (props) => {
                     <GameBoard onButtonClick={(buttonIndex) => void makeMove(buttonIndex)} grid={gameData.data.grid} />
                 )}
             </div>
+            {gameData.data?.state.endsWith('won') && (
+                <button type="button" onClick={() => void renewGame()}>RENEW</button>
+            )}
         </div>
     );
 };

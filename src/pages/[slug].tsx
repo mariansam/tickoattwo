@@ -56,7 +56,7 @@ const GamePage: NextPage<GamePageProps> = (props) => {
                 <link rel="icon" href="/favicon.ico" />
             </Head>
             <main>
-                <GameConnectDynamic slug={slug} />
+                <GameConnectDynamic key={slug }slug={slug} />
             </main>
         </>
     );
