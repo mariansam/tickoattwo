@@ -50,7 +50,7 @@ export const getGame = async (slug: string) => await prisma.gameSession.findFirs
 });
 
 /** @param lastPos use -1 for initial move */
-const isValidMove = (grid: GridFieldState[], buttonIndex: number, player: 'player1' | 'player2', lastPos: number) => {
+const isMoveValid = (grid: GridFieldState[], buttonIndex: number, player: 'player1' | 'player2', lastPos: number) => {
     if (buttonIndex < 0 || buttonIndex > 8)
         return false;
     if (buttonIndex === lastPos)
@@ -61,7 +61,7 @@ const isValidMove = (grid: GridFieldState[], buttonIndex: number, player: 'playe
     return true;
 };
 
-/** assumes isValidMove === true */
+/** assumes isMoveValid === true */
 const updateGrid = (grid: GridFieldState[], buttonIndex: number, player: 'player1' | 'player2') => {
     const currentValue = grid[buttonIndex]!;
     const newValue = currentValue === 'empty' ? `${player}in` as const : 'both';
@@ -125,7 +125,7 @@ export const exampleRouter = createTRPCRouter({
             playerId: z.string(),
             buttonIndex: z.number().min(0).max(8),
         }))
-        .mutation(async ({ ctx, input: { slug, playerId, buttonIndex } }) => {
+        .mutation(async ({ input: { slug, playerId, buttonIndex } }) => {
             const game = await getGame(slug);
             if (!game)
                 return;
@@ -135,7 +135,7 @@ export const exampleRouter = createTRPCRouter({
             if (game.state !== `${player}plays`)
                 return;
             const oppositePlayer = playerId === game.player1 ? 'player2' : 'player1';
-            const isValid = isValidMove(game.grid, buttonIndex, player, game.lastPos);
+            const isValid = isMoveValid(game.grid, buttonIndex, player, game.lastPos);
             if (!isValid)
                 return;
             const newGrid = updateGrid(game.grid, buttonIndex, player);
@@ -163,7 +163,7 @@ export const exampleRouter = createTRPCRouter({
 
     getGameData: publicProcedure
         .input(z.object({
-                slug: zodSlug(),
+            slug: zodSlug(),
         }))
         .query(async ({ input: { slug }}) => {
             const game = await getGame(slug);
@@ -175,7 +175,7 @@ export const exampleRouter = createTRPCRouter({
             };
         }),
 
-    newThingSubscription: tRPCProcudure
+    newGameDataSubscription: tRPCProcudure
         .input(z.object({
             slug: z.string(),
         }))

@@ -34,7 +34,7 @@ export const Game: React.FC<GameProps> = (props) => {
     const makeMoveMutation = api.example.makeMove.useMutation();
 
     const [subscribed, setSubscribed] = useState(false);
-    api.example.newThingSubscription.useSubscription({
+    api.example.newGameDataSubscription.useSubscription({
         slug,
     }, {
         onData: (message) => {
