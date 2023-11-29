@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GameState, type GridFieldState } from '@prisma/client';
+import { type GameState, type GridFieldState } from '@prisma/client';
 import { isMoveValid } from '~/utils/game';
 
 const PATHS = [
