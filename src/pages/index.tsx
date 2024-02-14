@@ -35,9 +35,10 @@ const Home: NextPage = () => {
             </Head>
             <main className='flex flex-col items-center'>
                 <div className='flex flex-col max-w-lg mx-5'>
-                    <button className="bg-slate-300 border border-slate-500 m-4 p-2" onClick={() => void sendMessage()}>SEND</button>
-                    <input ref={gameInputRef} type="text" className="bg-blue-200 border-5 text-xl rounded-xl border-red-500 px-4 py-2" />
-                    <button className="bg-slate-300 border border-slate-500 m-4 p-2" onClick={() => void connectToGame()}>CONNECT</button>
+                    <button className="bg-slate-300 border-blue-600 border-4 rounded-lg m-4 p-2" onClick={() => void sendMessage()}>CREATE GAME</button>
+                    <span className="text-center mb-4">or</span>
+                    <input ref={gameInputRef} type="text" placeholder="Game Code" className="bg-blue-200 border-5 text-lg rounded-xl border-red-500 px-4 py-2" />
+                    <button className="bg-slate-300 border-red-500 border-4 rounded-lg m-4 p-2" onClick={() => void connectToGame()}>CONNECT</button>
                 </div>
             </main>
         </>

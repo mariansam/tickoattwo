@@ -7,6 +7,7 @@ export type PlayerInfo = {
     playerId: string,
 } | {
     role: 'spectator',
+    playerId: undefined,
 }
 
 export type LocalData = Record<string, PlayerInfo>;

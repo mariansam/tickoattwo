@@ -155,6 +155,7 @@ export const exampleRouter = createTRPCRouter({
             const game = await getGame(slug);
             if (!game)
                 return;
+            console.log('game', game.id)
 
             if (!game.player1) {
                 const newPlayerId = cuid();
@@ -192,7 +193,8 @@ export const exampleRouter = createTRPCRouter({
 
                 return { role: 'player2' as const, playerId: newPlayerId };
             } else {
-                // visitor wants to connect
+                console.log('as spectator')
+                return { role: 'spectator' as const };
             }
         }),
 

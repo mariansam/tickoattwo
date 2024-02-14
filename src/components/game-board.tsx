@@ -49,11 +49,10 @@ export const GameBoard: React.FC<GameBoardProps> = (props) => {
 
     const [hoveredButton, setHoveredButton] = useState<number>();
 
-    const handleClick = () => {
-        console.log({hoveredButton})
-        if (hoveredButton === undefined)
-            return;
-        onButtonClick(hoveredButton);
+    const handleClick = (button: number) => {
+        console.log({hoveredButton, button})
+        onButtonClick(button);
+        setHoveredButton(undefined);
     };
 
     return (
@@ -63,7 +62,6 @@ export const GameBoard: React.FC<GameBoardProps> = (props) => {
             stroke="black"
             strokeWidth={16}
             fill="transparent"
-            onClick={handleClick}
         >
             <g stroke="transparent" strokeWidth={0}>
                 {PATHS.map((path, index) => (
@@ -97,6 +95,7 @@ export const GameBoard: React.FC<GameBoardProps> = (props) => {
                         key={index}
                         onMouseEnter={() => setHoveredButton(index)}
                         onMouseLeave={() => setHoveredButton(undefined)}
+                        onClick={() => handleClick(index)}
                         d={path}
                     />
                 ))}

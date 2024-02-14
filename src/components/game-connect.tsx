@@ -28,7 +28,7 @@ const GameConnect: React.FC<GameConnectProps> = (props) => {
         void (async () => {
             const playerInfo = await connectPlayerMutation.mutateAsync({ slug });
             if (!playerInfo)
-                return;  // you're a spectator or something went wrong :D
+                return;  // something went wrong
 
             setLocalData({ ...localData, [slug]: playerInfo });
             setPlayerRole(playerInfo.role);
@@ -36,7 +36,7 @@ const GameConnect: React.FC<GameConnectProps> = (props) => {
         })();
     }, []);
 
-    if (!playerRole || !playerId)
+    if (!playerRole || (!playerId && playerRole !== 'spectator'))
         return null;
 
     return (
